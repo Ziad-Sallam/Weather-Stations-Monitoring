@@ -1,1 +1,4 @@
+com/example/producer/WeatherMessage.class
 com/example/Main.class
+com/example/producer/SimpleProducerMock.class
+com/example/producer/WeatherMessage$Weather.class
