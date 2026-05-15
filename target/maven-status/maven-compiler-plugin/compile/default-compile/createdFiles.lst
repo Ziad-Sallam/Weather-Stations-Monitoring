@@ -1,4 +1,7 @@
+com/example/repo/WeatherMessage$Weather.class
 com/example/producer/WeatherMessage.class
+com/example/repo/WeatherMessage.class
+com/example/producer/WeatherMessage$Weather.class
+com/example/consumer/Consumer.class
 com/example/Main.class
 com/example/producer/SimpleProducerMock.class
-com/example/producer/WeatherMessage$Weather.class
