@@ -9,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import com.example.consumer.channel.MessageRoutingPipeline;
+import com.example.consumer.channel.AlertStreamsPipeline;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -74,15 +75,13 @@ public class Consumer {
         // 4. store latest status
         // TODO: bitcask.write(message.station_id, message)
 
-        // 5. check alerts (rain + low battery)
-        // TODO: alertStreams.check(message)
-
         // 6. archive to parquet (buffer managed internally)
         // TODO: parquetWriter.add(message)
     }
 
     public static void main(String[] args) {
         new MessageRoutingPipeline().start();
+        new AlertStreamsPipeline().start();
         new Consumer().start();
     }
 }

@@ -51,7 +51,9 @@ public class SimpleProducerMock {
             System.out.println("2 -> Send Random Valid Message");
             System.out.println("3 -> Send Invalid Message");
             System.out.println("4 -> Send Dead Letter Message");
-            System.out.println("5 -> Exit");
+            System.out.println("5 -> Send Rain Alert Message");
+            System.out.println("6 -> Send low battery alert Message");
+            System.out.println("7 -> Exit");
             System.out.print("Choose option: ");
 
             int choice = scanner.nextInt();
@@ -124,7 +126,46 @@ public class SimpleProducerMock {
 
                 selectedTopic = topic;  // Send to main topic, consumer will route it to dead letter
 
-            } else if (choice == 5) {
+            }else if (choice ==5){
+                                WeatherMessage msg = new WeatherMessage();
+
+                msg.station_id = random.nextInt(10) + 1;
+                msg.s_no = random.nextInt(1000);
+                msg.status_timestamp = System.currentTimeMillis();
+
+                String[] batteryStatuses = {
+                        "low",
+                        "medium",
+                        "high"
+                };
+
+                msg.battery_status =
+                        batteryStatuses[random.nextInt(batteryStatuses.length)];
+
+                msg.weather = new WeatherMessage.Weather();
+                msg.weather.humidity = 80;
+                msg.weather.temperature = random.nextInt(61) - 10;
+                msg.weather.wind_speed = random.nextInt(151);
+
+                json = mapper.writeValueAsString(msg);
+            } else if (choice == 6) {
+                WeatherMessage msg = new WeatherMessage();
+
+                msg.station_id = random.nextInt(10) + 1;
+                msg.s_no = random.nextInt(1000);
+                msg.status_timestamp = System.currentTimeMillis();
+
+                // Force low battery status
+                msg.battery_status = "low";
+
+                msg.weather = new WeatherMessage.Weather();
+                msg.weather.humidity = random.nextInt(101);
+                msg.weather.temperature = random.nextInt(61) - 10;
+                msg.weather.wind_speed = random.nextInt(151);
+
+                json = mapper.writeValueAsString(msg);
+            }
+             else if (choice == 7) {
 
                 System.out.println("Exiting...");
                 break;
