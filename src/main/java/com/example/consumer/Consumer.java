@@ -30,7 +30,7 @@ public class Consumer {
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         this.kafkaConsumer = new KafkaConsumer<>(props);
-        this.kafkaConsumer.subscribe(Collections.singletonList("weather-station-topic"));
+        this.kafkaConsumer.subscribe(Collections.singletonList("weather-valid-topic"));
     }
 
     public void start() {
