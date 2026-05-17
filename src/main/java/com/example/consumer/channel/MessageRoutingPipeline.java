@@ -11,6 +11,8 @@ import org.apache.kafka.streams.kstream.Branched;
 import org.apache.kafka.streams.kstream.KStream;
 
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageRoutingPipeline {
 
@@ -22,6 +24,8 @@ public class MessageRoutingPipeline {
     private final KafkaStreams streams;
     private final Gson gson = new Gson();
 
+    // to changed in-memory set to Redis or RocksDB for production use
+    private final Set<String> seenMessages = ConcurrentHashMap.newKeySet(); 
     public MessageRoutingPipeline() {
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG,    "message-routing-pipeline");
@@ -47,6 +51,14 @@ public class MessageRoutingPipeline {
                 (key, value) -> !isValid(value),
                 Branched.withConsumer(stream ->
                     stream.to(DEAD_LETTER_TOPIC))
+            )
+            // depublication
+            .branch(
+                (key, value) -> isDuplicate(value),
+                Branched.withConsumer(stream -> {
+                    stream.peek((key, value) ->
+                        System.out.println("[DUPLICATE] Dropped: " + value));
+                })
             )
             // valid
             .defaultBranch(
@@ -78,6 +90,20 @@ public class MessageRoutingPipeline {
         try {
             WeatherMessage msg = gson.fromJson(raw, WeatherMessage.class);
             return msg != null && msg.isValid();
+        } catch (JsonSyntaxException e) {
+            return false;
+        }
+    }
+
+        private boolean isDuplicate(String raw) {
+        try {
+            WeatherMessage msg = gson.fromJson(raw, WeatherMessage.class);
+            if (msg == null) return false;
+
+            String key = msg.station_id + ":" + msg.s_no;
+
+            return !seenMessages.add(key);
+
         } catch (JsonSyntaxException e) {
             return false;
         }
