@@ -19,6 +19,7 @@ public class Consumer {
 
     private final KafkaConsumer<String, String> kafkaConsumer;
     private final Gson gson = new Gson();
+    private final WeatherParquetWriter parquetWriter = new WeatherParquetWriter();
     public Consumer() {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -76,7 +77,7 @@ public class Consumer {
         // TODO: bitcask.write(message.station_id, message)
 
         // 6. archive to parquet (buffer managed internally)
-        // TODO: parquetWriter.add(message)
+        parquetWriter.add(message);
     }
 
     public static void main(String[] args) {

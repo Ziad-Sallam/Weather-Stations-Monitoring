@@ -53,7 +53,8 @@ public class SimpleProducerMock {
             System.out.println("4 -> Send Dead Letter Message");
             System.out.println("5 -> Send Rain Alert Message");
             System.out.println("6 -> Send low battery alert Message");
-            System.out.println("7 -> Exit");
+            System.out.println("7 -> Send 10k Messages");
+            System.out.println("8 -> Exit");
             System.out.print("Choose option: ");
 
             int choice = scanner.nextInt();
@@ -165,7 +166,42 @@ public class SimpleProducerMock {
 
                 json = mapper.writeValueAsString(msg);
             }
-             else if (choice == 7) {
+            else if (choice == 7) {
+
+                // Send 10k messages
+                for (int i = 0; i < 10_000; i++) {
+                    WeatherMessage msg = new WeatherMessage();
+
+                    msg.station_id = random.nextInt(10) + 1;
+                    msg.s_no = random.nextInt(1000);
+                    msg.status_timestamp = System.currentTimeMillis();
+
+                    String[] batteryStatuses = {
+                            "low",
+                            "medium",
+                            "high"
+                    };
+
+                    msg.battery_status =
+                            batteryStatuses[random.nextInt(batteryStatuses.length)];
+
+                    msg.weather = new WeatherMessage.Weather();
+                    msg.weather.humidity = random.nextInt(101);
+                    msg.weather.temperature = random.nextInt(61) - 10;
+                    msg.weather.wind_speed = random.nextInt(151);
+
+                    String batchJson = mapper.writeValueAsString(msg);
+
+                    ProducerRecord<String, String> batchRecord =
+                            new ProducerRecord<>(topic, batchJson);
+
+                    producer.send(batchRecord);
+                }
+
+                producer.flush();
+                System.out.println("Sent 10,000 messages!");
+            }
+             else if (choice == 8) {
 
                 System.out.println("Exiting...");
                 break;
