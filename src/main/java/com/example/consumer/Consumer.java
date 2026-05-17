@@ -2,14 +2,13 @@ package com.example.consumer;
 
 import com.example.repo.WeatherMessage;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import com.example.consumer.channel.InvalidMessageChannel;
-import com.example.consumer.channel.DeadLetterChannel;
+import com.example.consumer.channel.MessageRoutingPipeline;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -19,9 +18,6 @@ public class Consumer {
 
     private final KafkaConsumer<String, String> kafkaConsumer;
     private final Gson gson = new Gson();
-    private final InvalidMessageChannel invalidMessageChannel = new InvalidMessageChannel();
-    private final DeadLetterChannel deadLetterChannel = new DeadLetterChannel();
-
     public Consumer() {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -57,16 +53,9 @@ public class Consumer {
         WeatherMessage message;
         try {
             message = gson.fromJson(raw, WeatherMessage.class);
-        } catch (JsonSyntaxException e) {
-            System.err.println("[INVALID] Malformed JSON: " + raw);
-            invalidMessageChannel.send(raw);        // Done
-            return;
-        }
-
-        // 2. validate fields
-        if (!message.isValid()) {
-            System.err.println("[INVALID] Failed validation: " + raw);
-            deadLetterChannel.send(raw);    // Done
+        } catch (Exception e) {
+            // 2. if parsing fails, log and skip (message will be routed to invalid-messages topic by pipeline)
+            System.err.println("[ERROR] Failed to parse message: " + raw);
             return;
         }
 
@@ -93,6 +82,7 @@ public class Consumer {
     }
 
     public static void main(String[] args) {
+        new MessageRoutingPipeline().start();
         new Consumer().start();
     }
 }
