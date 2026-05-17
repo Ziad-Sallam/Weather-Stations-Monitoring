@@ -1,4 +1,7 @@
 /home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/Main.java
 /home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/consumer/Consumer.java
+/home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/consumer/channel/DeadLetterChannel.java
+/home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/consumer/channel/InvalidMessageChannel.java
+/home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/consumer/channel/MessageChannel.java
 /home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/producer/SimpleProducerMock.java
 /home/ziad-sallam/Work/CSED/DDIA/Project/src/main/java/com/example/repo/WeatherMessage.java

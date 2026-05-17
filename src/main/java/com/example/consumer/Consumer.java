@@ -8,6 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import com.example.consumer.channel.InvalidMessageChannel;
+import com.example.consumer.channel.DeadLetterChannel;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -17,6 +19,8 @@ public class Consumer {
 
     private final KafkaConsumer<String, String> kafkaConsumer;
     private final Gson gson = new Gson();
+    private final InvalidMessageChannel invalidMessageChannel = new InvalidMessageChannel();
+    private final DeadLetterChannel deadLetterChannel = new DeadLetterChannel();
 
     public Consumer() {
         Properties props = new Properties();
@@ -55,14 +59,14 @@ public class Consumer {
             message = gson.fromJson(raw, WeatherMessage.class);
         } catch (JsonSyntaxException e) {
             System.err.println("[INVALID] Malformed JSON: " + raw);
-            // TODO: invalidMessageChannel.send(raw)  ← bonus
+            invalidMessageChannel.send(raw);        // Done
             return;
         }
 
         // 2. validate fields
         if (!message.isValid()) {
             System.err.println("[INVALID] Failed validation: " + raw);
-            // TODO: deadLetterChannel.send(raw)  ← bonus
+            deadLetterChannel.send(raw);    // Done
             return;
         }
 
