@@ -30,7 +30,6 @@ public class SimpleProducerMock {
     public static void main(String[] args) throws Exception {
 
         String topic = "weather-station-topic";
-        String deadLetterTopic = "weather-dead-letter-topic";
 
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
