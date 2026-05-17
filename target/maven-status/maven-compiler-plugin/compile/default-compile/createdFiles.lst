@@ -1,10 +1,9 @@
-com/example/consumer/channel/DeadLetterChannel.class
 com/example/repo/WeatherMessage$Weather.class
 com/example/producer/WeatherMessage.class
 com/example/repo/WeatherMessage.class
 com/example/producer/WeatherMessage$Weather.class
 com/example/consumer/Consumer.class
 com/example/consumer/channel/MessageChannel.class
-com/example/consumer/channel/InvalidMessageChannel.class
 com/example/Main.class
 com/example/producer/SimpleProducerMock.class
+com/example/consumer/channel/MessageRoutingPipeline.class
