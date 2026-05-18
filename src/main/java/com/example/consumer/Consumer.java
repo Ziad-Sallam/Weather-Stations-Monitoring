@@ -1,5 +1,6 @@
 package com.example.consumer;
 
+import com.example.bitcaskstore.BitCaskStore;
 import com.example.repo.WeatherMessage;
 import com.google.gson.Gson;
 
@@ -11,6 +12,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import com.example.consumer.channel.MessageRoutingPipeline;
 import com.example.consumer.channel.AlertStreamsPipeline;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
@@ -20,7 +22,8 @@ public class Consumer {
     private final KafkaConsumer<String, String> kafkaConsumer;
     private final Gson gson = new Gson();
     private final WeatherParquetWriter parquetWriter = new WeatherParquetWriter();
-    public Consumer() {
+    private final BitCaskStore bitcask;
+    public Consumer() throws IOException {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "central-station-group");
@@ -33,10 +36,15 @@ public class Consumer {
 
         this.kafkaConsumer = new KafkaConsumer<>(props);
         this.kafkaConsumer.subscribe(Collections.singletonList("weather-valid-topic"));
+        this.bitcask = new BitCaskStore("./bitcask-data");
     }
 
     public void start() {
         System.out.println("Central Station Consumer started...");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try { bitcask.close(); } catch (IOException ignored) {}
+        }));
 
         while (true) {
             ConsumerRecords<String, String> records =
@@ -50,7 +58,7 @@ public class Consumer {
 
     private void processRecord(ConsumerRecord<String, String> record) {
         String raw = record.value();
-
+        
         // 1. try to parse JSON
         WeatherMessage message;
         try {
@@ -76,11 +84,19 @@ public class Consumer {
         // 4. store latest status
         // TODO: bitcask.write(message.station_id, message)
 
+
+        try {
+            // Key = station_id (String), Value = raw JSON of the full message
+            bitcask.put(String.valueOf(message.station_id), raw);
+        } catch (IOException e) {
+            System.err.println("[ERROR] BitCask write failed for station "
+                    + message.station_id + ": " + e.getMessage());
+        }
         // 6. archive to parquet (buffer managed internally)
         parquetWriter.add(message);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new MessageRoutingPipeline().start();
         new AlertStreamsPipeline().start();
         new Consumer().start();

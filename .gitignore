@@ -2,4 +2,5 @@
 .github
 target/
 parquet-data/
+bitcask-data/
 *.class
