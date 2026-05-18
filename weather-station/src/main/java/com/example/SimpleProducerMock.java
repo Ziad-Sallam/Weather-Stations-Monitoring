@@ -173,7 +173,7 @@ public class SimpleProducerMock {
                     WeatherMessage msg = new WeatherMessage();
 
                     msg.station_id = random.nextInt(10) + 1;
-                    msg.s_no = random.nextInt(1000);
+                    msg.s_no = random.nextInt(10000000);
                     msg.status_timestamp = System.currentTimeMillis();
 
                     String[] batteryStatuses = {
